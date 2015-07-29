@@ -18,14 +18,13 @@ var pageComponent $ React.createClass $ {}
   :displayName :app-page
 
   :getInitialState $ \ ()
-    {} (:text :) (:placeholder undefined)
+    {} (:text :)
 
   :onChange $ \ (text)
     this.setState $ {} (:text text)
 
   :onSubmit $ \ (data)
-    console.log (data.toJS)
-    this.setState $ {} (:text :) (:placeholder (data.get 0))
+    this.setState $ {} (:text data)
 
   :render $ \ ()
     div ({} (:className :app-page))
@@ -34,7 +33,7 @@ var pageComponent $ React.createClass $ {}
         :value this.state.text
         :onChange this.onChange
         :onSubmit this.onSubmit
-        :placeholder this.state.placeholder
+        :placeholder :Complete
 
 var Page $ React.createFactory pageComponent
 

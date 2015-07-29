@@ -47,10 +47,12 @@ var
       filter $ \\ (pair)
         var key $ pair.get 0
         = key $ key.toLowerCase
-        >= (key.indexOf this.props.value) 0
+        >= (key.indexOf (this.props.value.toLowerCase)) 0
       toList
-      sortBy $ \ (pair)
-        pair.get 1
+      sort $ \ (a b)
+        if (> (a.get 1) (b.get 1)) $ do (return -1)
+        if (< (a.get 1) (b.get 1)) $ do (return 1)
+        return 0
 
   :onChange $ \ (event)
     this.setState $ {}
@@ -63,13 +65,20 @@ var
     switch (keycode event.keyCode)
       :enter
         var current $ items.get this.state.index
-        this.selectCurrent current
+        if (and (? current) this.state.showMenu)
+          do
+            this.selectCurrent $ current.get 0
+          do
+            this.selectCurrent this.props.value
         this.setState $ {} (:showMenu false)
       :up
         this.selectAbove items.size
         event.stopPropagation
       :down
         this.selectBelow items.size
+        event.stopPropagation
+      :esc
+        this.setState $ {} (:showMenu false)
         event.stopPropagation
     return undefined
 
@@ -87,7 +96,10 @@ var
   :onItemClick $ \ (index)
     var items $ this.filterOptions
     var current $ items.get index
-    this.selectCurrent current
+    this.selectCurrent $ current.get 0
+
+  :onMouseEnter $ \ (event)
+    event.target.select
 
   :renderItems $ \ ()
     ... (this.filterOptions)
@@ -113,6 +125,7 @@ var
         :onBlur this.onBlur
         :onKeyDown this.onKeyDown
         :placeholder this.props.placeholder
+        :onMouseEnter this.onMouseEnter
       cond this.state.showMenu
         div ({} (:className :complete-menu))
           this.renderItems

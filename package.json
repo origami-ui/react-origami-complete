@@ -1,8 +1,8 @@
 {
   "name": "react-origami-complete",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Complete Menu for Origami UI",
-  "main": "main.js",
+  "main": "./lib/complete.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
