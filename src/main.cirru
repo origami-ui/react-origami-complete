@@ -18,22 +18,17 @@ var pageComponent $ React.createClass $ {}
   :displayName :app-page
 
   :getInitialState $ \ ()
-    {} (:text :)
-
-  :onChange $ \ (text)
-    this.setState $ {} (:text text)
+    {} (:placeholder ":Type Here")
 
   :onSubmit $ \ (data)
-    this.setState $ {} (:text data)
+    this.setState $ {} (:placeholder data)
 
   :render $ \ ()
     div ({} (:className :app-page))
       Complete $ {}
         :options options
-        :value this.state.text
-        :onChange this.onChange
         :onSubmit this.onSubmit
-        :placeholder :Complete
+        :placeholder this.state.placeholder
 
 var Page $ React.createFactory pageComponent
 

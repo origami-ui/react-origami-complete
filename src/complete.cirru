@@ -14,31 +14,34 @@ var
 
   :propTypes $ {}
     :options $ React.PropTypes.instanceOf Immutable.Map
-    :value React.PropTypes.string.isRequired
-    :onChange React.PropTypes.func.isRequired
     :onSubmit React.PropTypes.func.isRequired
     :placeholder React.PropTypes.string
 
   :getDefaultProps $ \ ()
-    {} (:placeholder :Complete)
+    {} (:placeholder :)
 
   :getInitialState $ \ ()
-    {} (:index 0) (:showMenu false)
+    {} (:index 0) (:showMenu false) (:value :) (:memory :)
 
-  :selectCurrent $ \ (data)
-    this.props.onSubmit data
+  :selectAbove $ \ ()
+    var items $ this.filterOptions
+    var nextIndex $ cond (> this.state.index 0)
+      - this.state.index 1
+      , items.size
+    var current $ items.get $ - nextIndex 1
+    this.setState $ {} (:index nextIndex)
+      :value $ cond (is nextIndex 0) this.state.memory
+        current.get 0
 
-  :selectAbove $ \ (size)
-    this.setState $ {}
-      :index $ cond (> this.state.index 0)
-        - this.state.index 1
-        - size 1
-
-  :selectBelow $ \ (size)
-    this.setState $ {}
-      :index $ cond (< this.state.index (- size 1))
-        + this.state.index 1
-        , 0
+  :selectBelow $ \ ()
+    var items $ this.filterOptions
+    var nextIndex $ cond (< this.state.index items.size)
+      + this.state.index 1
+      , 0
+    var current $ items.get $ - nextIndex 1
+    this.setState $ {} (:index nextIndex)
+      :value $ cond (is nextIndex 0) this.state.memory
+        current.get 0
 
   :filterOptions $ \ ()
     ... this.props.options
@@ -47,7 +50,7 @@ var
       filter $ \\ (pair)
         var key $ pair.get 0
         = key $ key.toLowerCase
-        >= (key.indexOf (this.props.value.toLowerCase)) 0
+        >= (key.indexOf (this.state.memory.toLowerCase)) 0
       toList
       sort $ \ (a b)
         if (> (a.get 1) (b.get 1)) $ do (return -1)
@@ -55,27 +58,24 @@ var
         return 0
 
   :onChange $ \ (event)
+    console.log event.target.value
     this.setState $ {}
       :showMenu true
       :index 0
-    this.props.onChange event.target.value
+      :value event.target.value
+      :memory event.target.value
 
   :onKeyDown $ \ (event)
     var items $ this.filterOptions
     switch (keycode event.keyCode)
       :enter
-        var current $ items.get this.state.index
-        if (and (? current) this.state.showMenu)
-          do
-            this.selectCurrent $ current.get 0
-          do
-            this.selectCurrent this.props.value
+        this.props.onSubmit this.state.value
         this.setState $ {} (:showMenu false)
       :up
-        this.selectAbove items.size
+        this.selectAbove
         event.stopPropagation
       :down
-        this.selectBelow items.size
+        this.selectBelow
         event.stopPropagation
       :esc
         this.setState $ {} (:showMenu false)
@@ -86,17 +86,16 @@ var
     this.setState $ {}
       :showMenu true
 
-  :onBlur $ \ (event)
-    setTimeout
-      \\ ()
-        this.setState $ {}
-          :showMenu false
-      , 10
+  :onMouseLeave $ \ (event)
+    this.setState $ {}
+      :showMenu false
 
-  :onItemClick $ \ (index)
-    var items $ this.filterOptions
-    var current $ items.get index
-    this.selectCurrent $ current.get 0
+  :onItemClick $ \ (key)
+    this.setState $ {}
+      :showMenu false
+      :value :
+      :memory :
+    this.props.onSubmit key
 
   :onMouseEnter $ \ (event)
     event.target.select
@@ -105,27 +104,25 @@ var
     ... (this.filterOptions)
       map $ \\ (pair index)
         var onClick $ \\ ()
-          this.onItemClick index
-        div
-          {}
-            :className $ classnames :complete-item
-              {} $ :is-selected $ is index this.state.index
-            :key (pair.get 0)
-            :onClick onClick
+          this.onItemClick $ pair.get 0
+        var className $ classnames :complete-item
+          {} $ :is-selected $ is index (- this.state.index 1)
+        div ({} (:className className) (:onClick onClick) (:key (pair.get 0)))
           pair.get 0
       toArray
 
   :render $ \ ()
-    div ({} (:className :origami-complete))
+    div
+      {} (:className :origami-complete)
+        :onMouseEnter this.onMouseEnter
+        :onMouseLeave this.onMouseLeave
       input $ {}
         :className :complete-text
-        :value this.props.value
+        :value this.state.value
         :onChange this.onChange
         :onFocus this.onFocus
-        :onBlur this.onBlur
         :onKeyDown this.onKeyDown
         :placeholder this.props.placeholder
-        :onMouseEnter this.onMouseEnter
       cond this.state.showMenu
         div ({} (:className :complete-menu))
           this.renderItems
