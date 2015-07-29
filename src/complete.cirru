@@ -58,7 +58,6 @@ var
         return 0
 
   :onChange $ \ (event)
-    console.log event.target.value
     this.setState $ {}
       :showMenu true
       :index 0
@@ -70,35 +69,32 @@ var
     switch (keycode event.keyCode)
       :enter
         this.props.onSubmit this.state.value
-        this.setState $ {} (:showMenu false)
+        this.setState $ {} (:showMenu false) (:value :) (:memory :)
       :up
         this.selectAbove
-        event.stopPropagation
+        this.setState $ {} (:showMenu true)
+        event.preventDefault
       :down
         this.selectBelow
-        event.stopPropagation
+        this.setState $ {} (:showMenu true)
+        event.preventDefault
       :esc
         this.setState $ {} (:showMenu false)
         event.stopPropagation
     return undefined
 
-  :onFocus $ \ (event)
-    this.setState $ {}
-      :showMenu true
-
-  :onMouseLeave $ \ (event)
-    this.setState $ {}
-      :showMenu false
+  :onBlur $ \ (event)
+    setTimeout
+      \\ () $ this.setState $ {} (:showMenu false)
+      , 20
 
   :onItemClick $ \ (key)
-    this.setState $ {}
-      :showMenu false
-      :value :
-      :memory :
     this.props.onSubmit key
+    this.setState $ {} (:showMenu false) (:value :) (:memory :)
 
   :onMouseEnter $ \ (event)
     event.target.select
+    this.setState $ {} (:showMenu true)
 
   :renderItems $ \ ()
     ... (this.filterOptions)
@@ -114,15 +110,14 @@ var
   :render $ \ ()
     div
       {} (:className :origami-complete)
-        :onMouseEnter this.onMouseEnter
-        :onMouseLeave this.onMouseLeave
       input $ {}
         :className :complete-text
         :value this.state.value
         :onChange this.onChange
-        :onFocus this.onFocus
         :onKeyDown this.onKeyDown
         :placeholder this.props.placeholder
+        :onMouseEnter this.onMouseEnter
+        :onBlur this.onBlur
       cond this.state.showMenu
         div ({} (:className :complete-menu))
           this.renderItems

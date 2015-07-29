@@ -1,6 +1,6 @@
 {
   "name": "react-origami-complete",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Complete Menu for Origami UI",
   "main": "./lib/complete.js",
   "scripts": {
